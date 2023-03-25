@@ -25,11 +25,12 @@ class Tokenizer:
 
     def get_tokens(self,text : str):
         result = self.extract_text(text)
-        nltk.download('punkt')
-        nltk.download("stopwords")
-        stop_words = set(stopwords.words("english"))
-        result = word_tokenize(result)
-        return [word for word in result if word.casefold() not in stop_words]
+        if(result):
+            nltk.download('punkt')
+            nltk.download("stopwords")
+            stop_words = set(stopwords.words("english"))
+            result = word_tokenize(result)
+            return [word for word in result if word.casefold() not in stop_words]
 
 
 tokenizer = Tokenizer()
