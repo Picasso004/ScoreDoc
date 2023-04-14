@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    background-color: white;
+}
+
+header {
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+}
+
+.left-column {
+    flex-basis: 50%;
+}
+
+.input-container {
+    display: flex;
+}
+
+#input-text {
+    flex-grow: 1;
+}
+
+#add-button {
+    border-radius: 5px;
+}
+
+#label-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.label-item {
+    display: flex;
+    justify-content: space-between;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+}
+
+#search-button {
+    background-color: blue;
+    color: white;
+}
+
+#results-container {
+    background-color: lightgray;
+}
+
+.right-column {
+    flex-basis: 50%;
+}
+
+#drop-zone {
+    border: 2px dashed black;
+}
+
+#file-input {
+    display: none;
+}

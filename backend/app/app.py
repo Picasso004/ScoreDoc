@@ -1,4 +1,6 @@
-import nltk
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import nltk,os
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -8,11 +10,46 @@ nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')'''
 
+
+app = Flask("Finder")
+CORS(app)
+
+# Route to handle file upload
+@app.route('/upload', methods=['POST'])
+def upload():
+    # Receive files
+    for i in range(len(request.files)):
+        file = request.files[f"file{i}"]
+        file.save('media/uploads/' + file.filename)
+    #file = request.files['file']
+    # Handle the file upload here, e.g., save the file to a directory
+    # and return a response to the client
+    # Example: saving the file to a directory named 'uploads'
+    #file.save('media/uploads/' + file.filename)
+    return jsonify({'message': 'File uploaded successfully'})
+
+@app.route('/api/data', methods=['POST'])
+def receive_data():
+    # Access the keywords using 'request.form'
+    keywords = request.json['keywords']
+    final_results = []
+    for filename in os.listdir("media/uploads"):
+        f = os.path.join("media/uploads", filename)
+        processor = TextProcessor(f)
+        result = processor.get_most_relevant_words(keywords)
+        final_results.append({'file': filename, 'value': result})
+        os.remove(f)
+
+    return jsonify(final_results)
+
+
 class TextProcessor:
-    """to turn words from text into tokens"""
-    def __init__(self):
-        self.text = ""
+    def __init__(self,file : str):
+        self.extract_text(file)
         self.processed_text = []
+        self.tokenize()
+        self.lemmatize()
+
     def extract_text(self,file : str):
         """to extract text any text file"""
         if file.endswith(".txt"):
@@ -62,24 +99,18 @@ class TextProcessor:
             lemmatized_words.append(lemmatized_word)
 
         self.processed_text = lemmatized_words
-        print(self.processed_text)
+
     def get_most_relevant_words(self,words):
-        score = dict()
+        score = {f'{word}': 0 for word in words}
         for word in self.processed_text:
             if word.lower() in [w.lower() for w in words]:
-                if word in score.keys():
-                    score[word] += 1
-                else:
-                    score[word] = 1
+                score[word] += 1
+
         #Sorting the result in descending order
-        score = dict(sorted(score.items(), key=lambda item: item[1], reverse=True))
-        return score
+        result = sorted(score.items(), key=lambda item: item[1], reverse=True)
+        result = [{'word': word, 'score': score} for word, score in result]
+        return result
 
 
-
-test = TextProcessor()
-test.extract_text("..\Docs samples\who-rights-roles-respon-hw-covid-19.pdf")
-test.tokenize()
-test.lemmatize()
-print(test.get_most_relevant_words(['covid','disease','rights']))
-
+if __name__ =="__main__":
+    app.run("localhost", 6969)
