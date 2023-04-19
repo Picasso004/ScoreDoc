@@ -1,10 +1,12 @@
+import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import nltk,os
+import nltk, os, math
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from PyPDF2 import PdfReader
+
 '''nltk.download('punkt')
 nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
@@ -21,34 +23,38 @@ def upload():
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
         file.save('media/uploads/' + file.filename)
-    #file = request.files['file']
-    # Handle the file upload here, e.g., save the file to a directory
-    # and return a response to the client
-    # Example: saving the file to a directory named 'uploads'
-    #file.save('media/uploads/' + file.filename)
     return jsonify({'message': 'File uploaded successfully'})
 
 @app.route('/api/data', methods=['POST'])
 def receive_data():
     # Access the keywords using 'request.form'
     keywords = request.json['keywords']
-    final_results = []
+    processor = TextProcessor()
+    data = []
     for filename in os.listdir("media/uploads"):
         f = os.path.join("media/uploads", filename)
-        processor = TextProcessor(f)
-        result = processor.get_most_relevant_words(keywords)
-        final_results.append({'file': filename, 'value': result})
+        processor.set_file(f)
+        process_result = processor.get_most_relevant_words(keywords)
+        data.append({'file': filename, 'len': processor.file_len(), 'data': process_result})
         os.remove(f)
 
-    return jsonify(final_results)
+    data = processor.calculate_tf_idf(data)
+    return jsonify(data)
 
 
 class TextProcessor:
-    def __init__(self,file : str):
-        self.extract_text(file)
+    def __init__(self, file: str = None):
+        if file:
+            self.set_file(file)
         self.processed_text = []
+
+    def set_file(self,file):
+        self.extract_text(file)
         self.tokenize()
         self.lemmatize()
+
+    def file_len(self):
+        return len(self.text)
 
     def extract_text(self,file : str):
         """to extract text any text file"""
@@ -101,15 +107,61 @@ class TextProcessor:
         self.processed_text = lemmatized_words
 
     def get_most_relevant_words(self,words):
-        score = {f'{word}': 0 for word in words}
+        score = {f'{word.lower()}': 0 for word in words}
         for word in self.processed_text:
             if word.lower() in [w.lower() for w in words]:
-                score[word] += 1
+                score[word.lower()] += 1
 
         #Sorting the result in descending order
         result = sorted(score.items(), key=lambda item: item[1], reverse=True)
         result = [{'word': word, 'score': score} for word, score in result]
         return result
+
+    def calculate_tf_idf(self, documents):
+        """
+        Calculates TF-IDF score for each document based on the keywords and scores provided.
+
+        Args:
+        - documents (list): List of dictionaries representing documents, with 'file' and 'data' keys.
+                           'file' (str): File name of the document.
+                           'data' (list): List of dictionaries representing keywords and scores.
+                                         'word' (str): Keyword.
+                                         'score' (int): Score for the keyword.
+
+        Returns:
+        - list: List of dictionaries representing documents with additional 'tf_idf' key containing TF-IDF score.
+               'file' (str): File name of the document.
+               'data' (list): List of dictionaries representing keywords and scores.
+                             'word' (str): Keyword.
+                             'score' (int): Score for the keyword.
+               'tf_idf' (float): TF-IDF score for the document.
+        """
+        n = len(documents)
+
+        df = {}
+        for document in documents:
+            for word in document['data']:
+                keyword = word['word']
+                if keyword not in df.keys():
+                    df[keyword] = 0
+                if word['score'] != 0:
+                    df[keyword] += 1
+
+        # Calculate TF-IDF score for each document
+        for document in documents:
+            tf_idf_sum = 0
+            keywords = document['data']
+            for keyword in keywords:
+                tf = keyword['score']/float(document['len'])
+                if df[keyword['word']] == 0:
+                    idf = 0
+                else:
+                    idf = math.log(n / float(df[keyword['word']]))
+                tf_idf = tf * idf
+                tf_idf_sum += tf_idf
+            document['tf_idf'] = tf_idf_sum
+
+        return sorted(documents, key=lambda x: x['tf_idf'], reverse=True)
 
 
 if __name__ =="__main__":

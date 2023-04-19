@@ -9,7 +9,7 @@
         text-align: center;
     }
 
-    .add-button, #upload-button,.search-button{
+    .add-button, #upload-button,.search-button, #clear-button{
         margin-left: 1rem;
         background-color: rgb(37, 120, 228);
         color: rgb(255, 255, 255);
@@ -35,7 +35,7 @@
       border: 2px dashed #666;
       padding: 20px;
       text-align: center;
-      height: 500px;
+      height: 100px;
       width: 150px;
       margin: auto;
       margin-top: 10px;
@@ -93,9 +93,24 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    #clear-button{
+      margin-right: 50px;
+      display: none;
+    }
+    .result_container, #keyword_list_container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .most_relevant {
+      font-size: 20px;
+      background-color: yellow;
+      margin-left: 50px;
+    }
 
     .file-list {
-      margin-top: 20px;
+      margin-top: 50px;
+      margin-bottom: 20px;
     }
     .file-list ul {
       padding: 0;
@@ -104,14 +119,31 @@
     .file-list li {
       margin-bottom: 5px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
     }
-    .file-list li button {
+    .remove-btn{
       margin-left: 10px;
       background-color: red;
       color: white;
       border: none;
       cursor: pointer;
+    }
+
+    .eye-btn {
+      cursor: pointer;
+      margin-left: 5px;
+      background-color:#4CAF50;
+    }
+    /* Style for the embedded PDF viewer */
+    .pdf-viewer {
+      display: none;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    #resultsZone{
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -124,8 +156,14 @@
       <!-- Left Column Content -->
       <label for="keywords">Enter key words:</label>
       <input type="text" id="keywords" name="keywords" onkeydown="checkKeyPress(event)">
-      <button class="add-button" onclick="addKeyword()">Add</button>
-      <div id="keywordList" class="keyword-list">No keywords</div>
+      <button id="add-key-word-btn" class="add-button">Add</button>
+      <!-- Input element for file selection -->
+      <input type="file" id="keyWordFileInput" style="display: none;" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <button class="add-button" id="keyword-upload-button">Add from file</button>
+      <div id="keyword_list_container">
+        <button id="clear-button">Clear</button>
+        <div id="keywordList" class="keyword-list">No keywords</div>
+      </div>  
       <button class="search-button" onclick="searchKeywords()">Search</button>
       <div id="resultsZone"></div>
     </div>
@@ -140,15 +178,17 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
  // JavaScript code
 // Global array to store keywords
 let keywords = [];
 
+const clearButton = document.getElementById('clear-button');
+
 // Function to add keyword to the list
-function addKeyword() {
+function addKeyword(keyword) {
   const keywordInput = document.getElementById('keywords');
-  const keyword = keywordInput.value.trim();
   if (keyword !== '') {
     keywords.push(keyword);
     keywordInput.value = '';
@@ -159,21 +199,36 @@ function addKeyword() {
 // Function to update keyword list in the UI
 function updateKeywordList() {
   const keywordList = document.getElementById('keywordList');
-  keywordList.innerHTML = '';
-  for (let i = 0; i < keywords.length; i++) {
-    const keywordItem = document.createElement('div');
-    keywordItem.className = 'keyword-list-item';
-    keywordItem.innerHTML = `
-      <span>${keywords[i]}</span>
-      <button onclick="removeKeyword(${i})">&#x2716;</button>
-    `;
-    keywordList.appendChild(keywordItem);
+  if(keywords.length == 0){
+    clearButton.style.display = 'none';
+    keywordList.innerHTML = 'No keywords';
   }
+  else{
+    clearButton.style.display = 'block';
+  
+    keywordList.innerHTML = '';
+    for (let i = 0; i < keywords.length; i++) {
+      const keywordItem = document.createElement('div');
+      keywordItem.className = 'keyword-list-item';
+      keywordItem.innerHTML = `
+        <span>${keywords[i]}</span>
+        <button onclick="removeKeyword(${i})">&#x2716;</button>
+      `;
+      keywordList.appendChild(keywordItem);
+    }
+  }
+  
+
 }
 
 // Function to remove keyword from the list
 function removeKeyword(index) {
   keywords.splice(index, 1);
+  updateKeywordList();
+}
+
+function clear(){
+  keywords = [];
   updateKeywordList();
 }
 
@@ -189,12 +244,13 @@ function searchKeywords() {
     searchButton.innerHTML = 'Searching...';
     searchButton.disabled = true;
     searchButton.classList.add('loading');
+    resultsZone.textContent = "Loading...";
 
     //Sending files
     const formData = new FormData();
-    const files = document.getElementById('fileInput').files;
-    for(let i=0; i<files.length;i++){
-        formData.append(`file${i}`, files[i]);
+    //const files = document.getElementById('fileInput').files;
+    for(let i=0; i<d.files.length;i++){
+        formData.append(`file${i}`, d.files[i]);
     }
     fetch('http://localhost:6969/upload', {
         method: 'POST',
@@ -223,23 +279,30 @@ function searchKeywords() {
         searchButton.innerHTML = 'Search';
         searchButton.disabled = false;
         searchButton.classList.remove('loading');
-        console.log(result);
         // Update results zone with data from server
-        resultsZone.innerHTML = "<h2>Results:</h2>";
+        resultsZone.innerHTML = `
+        <div class="result_container">
+          <h2>Result: </h2>
+          <p class="most_relevant"> ${result[0].file} </p>
+        </div>`;
         for(let i = 0;i<result.length;i++){
             resultsZone.innerHTML += `
             <h3>${result[i].file}</h3>
             <ul>
-                ${result[i].value.map(item => `<li>${item.word}: ${item.score}</li>`).join('')}
+                ${result[i].data.map(item => `<li>${item.word}: ${item.score}</li>`).join('')}
             </ul>
         `;
         }
-        
+        reorganizeFiles(result); 
       })
       .catch(error => {
         console.error('Error sending data to server:', error);
-        resultsZone.innerHTML = 'Error loading data';
+        resultsZone.textContent = 'Error loading data';
       });
+      
+  }
+  else{
+    resultsZone.textContent = "It seems that keywords or files are missing:(";
   }
 }
 
@@ -247,44 +310,144 @@ function searchKeywords() {
 function checkKeyPress(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
-    addKeyword();
+    const keywordInput = document.getElementById('keywords');
+    const keyword = keywordInput.value.trim();
+    addKeyword(keyword);
   }
 }
 
 const dropZone = document.getElementById('dropZone');
 const uploadBtn = document.getElementById('upload-button');
 const fileInput = document.getElementById('fileInput');
+const keyWordInput = document.getElementById('keyWordFileInput');
+const keyWordUpldBtn = document.getElementById('keyword-upload-button');
+const addKeywordBtn = document.getElementById('add-key-word-btn');
 
 
+let d = new DataTransfer();
 // Handle uploaded files
 function handleFiles(files) {
+      let fileFound = false;
       for (const file of files) {
+        for(const f of d.files){
+          if(file.name == f.name){
+            fileFound = true;
+            break;
+          }
+        }
+        if(fileFound) continue;
+        const div = document.createElement('div');
         const li = document.createElement('li');
-        li.textContent = file.name;
+        div.textContent = file.name;
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'X';
+        deleteBtn.classList.add('remove-btn');
         deleteBtn.addEventListener('click', (e) => {
         e.preventDefault();
         li.remove(); // Remove the file from the file list
-        removeFileFromFileList(li.textContent.slice(0,-1));
+        removeFileFromFileList(div.textContent.slice(0,-4));
         });
-        li.appendChild(deleteBtn);
-        ul.appendChild(li);
+
+        const viewBtn = document.createElement('button');
+        viewBtn.textContent = '👁️';
+        viewBtn.classList.add('eye-btn');
+        viewBtn.addEventListener('click', () => {
+          var pdfViewer = document.getElementById(file.name);
+          pdfViewer.style.display = (pdfViewer.style.display == "block") ? "none" : "block";
+        });
+        div.appendChild(viewBtn);
+        div.appendChild(deleteBtn);
+
+        li.append(div);
+
+        const pdfViewer = document.createElement('div');
+        pdfViewer.classList.add("pdf-viewer");
+        pdfViewer.id = file.name;
+
+        const embedElement = document.createElement('embed');
+        embedElement.src = URL.createObjectURL(file);
+        embedElement.width = '660';
+        embedElement.height = '400';
+        
+
+        pdfViewer.append(embedElement);
+        li.append(pdfViewer);
+        ul.append(li);
+
+        //Save in files list variable
+        d.items.add(file);
       }
+      //console.log(d.files);
+      fileInput.files = d.files;
+      //console.log(d.items);
+      
 }
 function removeFileFromFileList(filename) {
-  const dt = new DataTransfer()
-  const input = document.getElementById('fileInput')
-  const files = input.files;
+  const dt = new DataTransfer();
+  //const input = document.getElementById('fileInput')
+  const files = d.files;
   
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
-    if (file.name !== filename){
+    if (file.name != filename){
       dt.items.add(file) // here you exclude the file. thus removing it.
     }
   }
-  input.files = dt.files // Assign the updates list
+  d = dt // Update the list
+  fileInput.files = d.files;
+  
 }
+
+function reorganizeFiles(files){
+  var items = Array.from(ul.getElementsByTagName("li"));
+
+  while (ul.firstChild) {
+    ul.removeChild(ul.firstChild);
+  }
+
+  for(let i =0;i<files.length;i++){
+    for (var j = 0; j < items.length; j++) {
+      if(files[i].file == items[j].firstChild.textContent.slice(0,-4)){
+        ul.appendChild(items[j]);
+      }
+    }
+  }
+}
+
+function loadKeywords(file){
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const data = e.target.result;
+    let parsedData =null;
+
+    /* Parse data based on file type */
+    if (file.name.endsWith('.csv')) {
+      // For CSV files
+      const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    } else {
+      // For Excel files
+      const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    }
+
+    for(let i=0;i<parsedData.length;i++){
+      addKeyword(parsedData[i][0]);
+    }
+  };
+
+  reader.readAsBinaryString(file);
+}
+    
+    // Handle upload button click event
+    addKeywordBtn.addEventListener('click', () => {
+      const keywordInput = document.getElementById('keywords');
+      const keyword = keywordInput.value.trim();
+      addKeyword(keyword);
+    });
 
     // Prevent default behavior for drag-and-drop events
     dropZone.addEventListener('dragover', (e) => {
@@ -316,6 +479,21 @@ function removeFileFromFileList(filename) {
     // Handle upload button click event
     uploadBtn.addEventListener('click', () => {
       fileInput.click();
+    });
+
+    // Handle add from file button click event
+    keyWordUpldBtn.addEventListener('click', () => {
+      keyWordInput.click();
+      
+    });
+
+    keyWordInput.addEventListener('change', (e) => {
+      loadKeywords(e.target.files[0]);
+    });
+
+   clearButton.addEventListener('click', () => {
+      clear();
+      
     });
 
 
