@@ -152,7 +152,6 @@ class TextProcessor:
                'tf_idf' (float): TF-IDF score for the document.
         """
         n = len(documents)
-
         df = {}
         for document in documents:
             for word in document['data']:
