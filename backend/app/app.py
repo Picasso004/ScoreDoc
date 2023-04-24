@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+import webbrowser
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import nltk, os, math
 from nltk.corpus import stopwords
@@ -11,9 +12,20 @@ nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
-
 app = Flask("Finder")
 CORS(app)
+
+
+@app.route('/')
+def hello():
+    return "Hello, World!"
+
+
+@app.route('/finder')
+def serve_finder():
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend'))
+    return send_from_directory(frontend_dir, 'finder.html')
+
 
 # Route to handle file upload
 @app.route('/upload', methods=['POST'])
@@ -23,6 +35,7 @@ def upload():
         file = request.files[f"file{i}"]
         file.save('media/uploads/' + file.filename)
     return jsonify({'message': 'File uploaded successfully'})
+
 
 @app.route('/api/data', methods=['POST'])
 def receive_data():
@@ -43,11 +56,12 @@ def receive_data():
 
 class TextProcessor:
     def __init__(self, file: str = None):
+        self.text = None
         if file:
             self.set_file(file)
         self.processed_text = []
 
-    def set_file(self,file):
+    def set_file(self, file):
         self.extract_text(file)
         self.tokenize()
         self.lemmatize()
@@ -55,9 +69,11 @@ class TextProcessor:
     def file_len(self):
         return len(self.text)
 
-    def extract_text(self,file : str):
+    def extract_text(self, file: str):
         """to extract text any text file"""
-        if file.endswith(".txt"):
+        if not os.path.exists(file):
+            return None
+        elif file.endswith(".txt"):
             with open(file, 'r') as text_file:
                 text = text_file.read()
             self.text = text
@@ -74,13 +90,13 @@ class TextProcessor:
             self.text = None
 
     def tokenize(self):
-        "stop words removal and tokenization lemmatization"
-        if(self.text != None):
+        """stop words removal and tokenization lemmatization"""
+        if self.text is not None:
             # tokenize words
             result = word_tokenize(self.text)
 
             # Removal of stop words
-            stop_words = set(stopwords.words("english") + ['.',',',';',':','-','(',')','•'])
+            stop_words = set(stopwords.words("english") + ['.', ',', ';', ':', '-', '(', ')', '•'])
             self.processed_text = [word for word in result if word.casefold() not in stop_words]
 
     def lemmatize(self):
@@ -105,13 +121,13 @@ class TextProcessor:
 
         self.processed_text = lemmatized_words
 
-    def get_most_relevant_words(self,words):
+    def get_most_relevant_words(self, words):
         score = {f'{word.lower()}': 0 for word in words}
         for word in self.processed_text:
             if word.lower() in [w.lower() for w in words]:
                 score[word.lower()] += 1
 
-        #Sorting the result in descending order
+        # Sorting the result in descending order
         result = sorted(score.items(), key=lambda item: item[1], reverse=True)
         result = [{'word': word, 'score': score} for word, score in result]
         return result
@@ -151,7 +167,7 @@ class TextProcessor:
             tf_idf_sum = 0
             keywords = document['data']
             for keyword in keywords:
-                tf = keyword['score']/float(document['len'])
+                tf = keyword['score'] / float(document['len'])
                 if df[keyword['word']] == 0:
                     idf = 0
                 else:
@@ -163,5 +179,7 @@ class TextProcessor:
         return sorted(documents, key=lambda x: x['tf_idf'], reverse=True)
 
 
-if __name__ =="__main__":
+if __name__ == "__main__":
+    url = "http://localhost:6969/finder"
+    webbrowser.open(url)
     app.run("localhost", 6969)
