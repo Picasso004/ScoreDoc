@@ -1,4 +1,3 @@
-import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import nltk, os, math
@@ -7,10 +6,10 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from PyPDF2 import PdfReader
 
-'''nltk.download('punkt')
+nltk.download('punkt')
 nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
-nltk.download('wordnet')'''
+nltk.download('wordnet')
 
 
 app = Flask("Finder")

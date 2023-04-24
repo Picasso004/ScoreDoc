@@ -345,11 +345,11 @@ function handleFiles(files) {
         deleteBtn.addEventListener('click', (e) => {
         e.preventDefault();
         li.remove(); // Remove the file from the file list
-        removeFileFromFileList(div.textContent.slice(0,-4));
+        removeFileFromFileList(div.textContent.slice(0,-3));
         });
 
         const viewBtn = document.createElement('button');
-        viewBtn.textContent = '👁️';
+        viewBtn.textContent = String.fromCodePoint(0x1F441);
         viewBtn.classList.add('eye-btn');
         viewBtn.addEventListener('click', () => {
           var pdfViewer = document.getElementById(file.name);
@@ -407,7 +407,7 @@ function reorganizeFiles(files){
 
   for(let i =0;i<files.length;i++){
     for (var j = 0; j < items.length; j++) {
-      if(files[i].file == items[j].firstChild.textContent.slice(0,-4)){
+      if(files[i].file == items[j].firstChild.textContent.slice(0,-3)){
         ul.appendChild(items[j]);
       }
     }
