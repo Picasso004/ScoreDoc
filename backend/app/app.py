@@ -33,7 +33,7 @@ def upload():
     # Receive files
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
-        file.save('media/uploads/' + file.filename)
+        file.save(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/' + file.filename)
     return jsonify({'message': 'File uploaded successfully'})
 
 
@@ -43,8 +43,9 @@ def receive_data():
     keywords = request.json['keywords']
     processor = TextProcessor()
     data = []
-    for filename in os.listdir("media/uploads"):
-        f = os.path.join("media/uploads", filename)
+    print(os.curdir)
+    for filename in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', filename)
         processor.set_file(f)
         process_result = processor.get_most_relevant_words(keywords)
         data.append({'file': filename, 'len': processor.file_len(), 'data': process_result})
@@ -57,7 +58,8 @@ def receive_data():
 class TextProcessor:
     def __init__(self, file: str = None):
         self.text = None
-        self.set_file(file)
+        if file:
+            self.set_file(file)
         self.processed_text = []
 
     def set_file(self, file):
