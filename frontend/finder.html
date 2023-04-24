@@ -236,7 +236,7 @@ const fileList = document.getElementById('fileList');
 const ul = fileList.querySelector('ul');
 
 // Function to search keywords
-function searchKeywords() {
+async function searchKeywords() {
   const searchButton = document.getElementsByClassName('search-button')[0];
   const resultsZone = document.getElementById('resultsZone');
   if (keywords.length > 0 && document.getElementById('fileInput').files.length > 0) { // Check if keywords and file are available
@@ -252,7 +252,7 @@ function searchKeywords() {
     for(let i=0; i<d.files.length;i++){
         formData.append(`file${i}`, d.files[i]);
     }
-    fetch('http://localhost:6969/upload', {
+    await fetch('http://localhost:6969/upload', {
         method: 'POST',
         body: formData
     })
@@ -293,13 +293,13 @@ function searchKeywords() {
             </ul>
         `;
         }
-        reorganizeFiles(result); 
+        reorganizeFiles(result);
       })
       .catch(error => {
         console.error('Error sending data to server:', error);
         resultsZone.textContent = 'Error loading data';
       });
-      
+
   }
   else{
     resultsZone.textContent = "It seems that keywords or files are missing:(";
