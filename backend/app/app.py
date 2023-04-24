@@ -7,6 +7,8 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from PyPDF2 import PdfReader
 
+print("Loading...")
+
 nltk.download('punkt')
 nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
@@ -14,8 +16,6 @@ nltk.download('wordnet')
 
 app = Flask("Finder")
 CORS(app)
-
-
 @app.route('/')
 def hello():
     return "Hello, World!"
@@ -57,14 +57,14 @@ def receive_data():
 class TextProcessor:
     def __init__(self, file: str = None):
         self.text = None
-        if file:
-            self.set_file(file)
+        self.set_file(file)
         self.processed_text = []
 
     def set_file(self, file):
-        self.extract_text(file)
-        self.tokenize()
-        self.lemmatize()
+        if os.path.exists(file):
+            self.extract_text(file)
+            self.tokenize()
+            self.lemmatize()
 
     def file_len(self):
         return len(self.text)
@@ -179,7 +179,11 @@ class TextProcessor:
         return sorted(documents, key=lambda x: x['tf_idf'], reverse=True)
 
 
-if __name__ == "__main__":
+def main():
     url = "http://localhost:6969/finder"
     webbrowser.open(url)
     app.run("localhost", 6969)
+
+
+if __name__ == "__main__":
+    main()
