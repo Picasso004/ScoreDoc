@@ -33,6 +33,7 @@ def upload():
     # Empty upload folder:
     for file in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
         os.remove(file)
+
     # Receive files
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
