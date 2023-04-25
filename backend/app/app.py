@@ -14,17 +14,17 @@ nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
-app = Flask("Finder")
+app = Flask("ScoreDoc")
 CORS(app)
 @app.route('/')
 def hello():
     return "Hello, World!"
 
 
-@app.route('/finder')
-def serve_finder():
+@app.route('/scoredoc')
+def serve_scoredoc():
     frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend'))
-    return send_from_directory(frontend_dir, 'finder.html')
+    return send_from_directory(frontend_dir, 'scoredoc.html')
 
 
 # Route to handle file upload
@@ -32,8 +32,8 @@ def serve_finder():
 def upload():
     # Empty upload folder:
     for file in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
-        os.remove(file)
-
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', file)
+        os.remove(f)
     # Receive files
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
@@ -185,7 +185,7 @@ class TextProcessor:
 
 
 def main():
-    url = "http://localhost:6969/finder"
+    url = "http://localhost:6969/scoredoc"
     webbrowser.open(url)
     app.run("localhost", 6969)
 
