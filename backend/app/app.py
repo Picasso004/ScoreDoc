@@ -30,6 +30,9 @@ def serve_finder():
 # Route to handle file upload
 @app.route('/upload', methods=['POST'])
 def upload():
+    # Empty upload folder:
+    for file in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
+        os.remove(file)
     # Receive files
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
@@ -43,13 +46,13 @@ def receive_data():
     keywords = request.json['keywords']
     processor = TextProcessor()
     data = []
-    print(os.curdir)
     for filename in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
-        f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', filename)
-        processor.set_file(f)
-        process_result = processor.get_most_relevant_words(keywords)
-        data.append({'file': filename, 'len': processor.file_len(), 'data': process_result})
-        os.remove(f)
+        if filename.endswith("txt") or filename.endswith("pdf"):
+            f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', filename)
+            processor.set_file(f)
+            process_result = processor.get_most_relevant_words(keywords)
+            data.append({'file': filename, 'len': processor.file_len(), 'data': process_result})
+            os.remove(f)
 
     data = processor.calculate_tf_idf(data)
     return jsonify(data)
