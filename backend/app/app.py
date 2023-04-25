@@ -32,8 +32,9 @@ def serve_scoredoc():
 def upload():
     # Empty upload folder:
     for file in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
-        f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', file)
-        os.remove(f)
+        if file.endswith("txt") or file.endswith("pdf"):
+            f = os.path.join(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/', file)
+            os.remove(f)
     # Receive files
     for i in range(len(request.files)):
         file = request.files[f"file{i}"]
