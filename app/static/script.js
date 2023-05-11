@@ -1,190 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>ScoreDoc</title>
-  <style>
-    header {
-        background-color: black;
-        color: white;
-        text-align: center;
-    }
+// JavaScript code
 
-    .add-button, #upload-button,.search-button, #clear-button{
-        margin-left: 1rem;
-        background-color: rgb(37, 120, 228);
-        color: rgb(255, 255, 255);
-        cursor: pointer;
-        padding: 0.5rem 1rem;
-        border-width: initial;
-        border-style: none;
-        border-color: initial;
-        border-image: initial;
-        border-radius: 5px;
-    }
-    .container {
-      display: flex;
-      height: 100vh;
-    }
-
-    .column {
-      flex: 1;
-      padding: 20px;
-    }
-
-    #dropZone {
-      border: 2px dashed #666;
-      padding: 20px;
-      text-align: center;
-      height: 100px;
-      width: 150px;
-      margin: auto;
-      margin-top: 10px;
-      background-color: #cbc7c776; 
-    }
-
-    #dropZone.drag-over{
-      border: 3px dashed #333;
-      background-color: #cbc7c7a3;
-    }
-
-    .upload-button {
-      margin-top: 10px;
-    }
-
-    .keyword-list {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      max-width: 300px; /* maximum width of 3 keywords per line */
-    }
-
-    .keyword-list-item {
-      list-style-type: none;
-      margin-right: 10px; /* space between keywords */
-      margin-bottom: 10px; /* space between lines */
-      background-color: #4CAF50; /* green background color */
-      color: #fff; /* white text color */
-      border-radius: 5px; /* rounded borders */
-      padding: 5px 10px; /* padding inside each keyword item */
-      display: flex; /* add flex display to align keyword and cross button */
-      align-items: center; /* center align keyword and cross button vertically */
-    }
-
-    .keyword-list-item button {
-        background-color: transparent;
-        color: red;
-        border: none;
-        cursor: pointer;
-    }
-
-    .spinner {
-      margin-top: 10px;
-      margin-left: 5px;
-      border: 2px solid #007bff;
-      border-radius: 50%;
-      border-top: 2px solid #fff;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    #clear-button{
-      margin-right: 50px;
-      display: none;
-    }
-    .result_container, #keyword_list_container {
-      display: flex;
-      align-items: center;
-    }
-    
-    .most_relevant {
-      font-size: 20px;
-      background-color: yellow;
-      margin-left: 50px;
-    }
-
-    .file-list {
-      margin-top: 50px;
-      margin-bottom: 20px;
-    }
-    .file-list ul {
-      padding: 0;
-      list-style-type: none;
-    }
-    .file-list li {
-      margin-bottom: 5px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .remove-btn{
-      margin-left: 10px;
-      background-color: red;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .eye-btn {
-      cursor: pointer;
-      margin-left: 5px;
-      background-color:#4CAF50;
-    }
-    /* Style for the embedded PDF viewer */
-    .pdf-viewer {
-      display: none;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-
-    #resultsZone{
-      margin-bottom: 20px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Finder</h1>
-  </header>
-  <div class="container">
-    <div class="column">
-      <!-- Left Column Content -->
-      <label for="keywords">Enter key words:</label>
-      <input type="text" id="keywords" name="keywords" onkeydown="checkKeyPress(event)">
-      <button id="add-key-word-btn" class="add-button">Add</button>
-      <!-- Input element for file selection -->
-      <input type="file" id="keyWordFileInput" style="display: none;" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-      <button class="add-button" id="keyword-upload-button">Add from file</button>
-      <div id="keyword_list_container">
-        <button id="clear-button">Clear</button>
-        <div id="keywordList" class="keyword-list">No keywords</div>
-      </div>  
-      <button class="search-button" onclick="searchKeywords()">Search</button>
-      <div id="resultsZone"></div>
-    </div>
-    <div class="column" id="dropZone">
-      <!-- Right Column Content - Drag and Drop Zone -->
-      <p>Drag and drop files here or click to browse</p>
-      <input type="file" id="fileInput" multiple style="display: none;">
-      <button id="upload-button" >Upload</button>
-      <div class="file-list" id="fileList">
-        <ul></ul>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-  <script>
- // JavaScript code
 // Global array to store keywords
 let keywords = [];
 
-const clearButton = document.getElementById('clear-button');
+//Global variables
+let clearButton;
+let keywordInput;
+let keyword;
+let dropZone;
+let uploadBtn;
+let fileInput;
+let keyWordInput;
+let keyWordUpldBtn;
+let addKeywordBtn;
+
+let fileList;
+let ul;
+
+
+let d = new DataTransfer();
+document.addEventListener("DOMContentLoaded", function(){
+  clearButton = document.getElementById('clear-button');
+  dropZone = document.getElementById('dropZone');
+  uploadBtn = document.getElementById('upload-button');
+  fileInput = document.getElementById('fileInput');
+  keyWordInput = document.getElementById('keyWordFileInput');
+  keyWordUpldBtn = document.getElementById('keyword-upload-button');
+  addKeywordBtn = document.getElementById('add-key-word-btn');
+
+  fileList = document.getElementById('fileList');
+  ul = fileList.querySelector('ul');
+
+  // Handle upload button click event
+    addKeywordBtn.addEventListener('click', () => {
+      keywordInput = document.getElementById('keywords');
+      keyword = keywordInput.value.trim();
+      addKeyword(keyword);
+    });
+
+    // Prevent default behavior for drag-and-drop events
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over'); // Add CSS class to change background color
+    });
+
+    // Handle drag leave event
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
+    });
+
+    // Handle file drop event
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
+      const files = e.dataTransfer.files;
+      document.getElementById('fileInput').files = files;
+      handleFiles(files);
+    });
+
+    // Handle file input change event
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      handleFiles(files);
+    });
+
+    // Handle upload button click event
+    uploadBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Handle add from file button click event
+    keyWordUpldBtn.addEventListener('click', () => {
+      keyWordInput.click();
+
+    });
+
+    keyWordInput.addEventListener('change', (e) => {
+      loadKeywords(e.target.files[0]);
+    });
+
+   clearButton.addEventListener('click', () => {
+      clear();
+
+    });
+});
+
+
+
+
 
 // Function to add keyword to the list
 function addKeyword(keyword) {
@@ -205,7 +109,7 @@ function updateKeywordList() {
   }
   else{
     clearButton.style.display = 'block';
-  
+
     keywordList.innerHTML = '';
     for (let i = 0; i < keywords.length; i++) {
       const keywordItem = document.createElement('div');
@@ -217,7 +121,7 @@ function updateKeywordList() {
       keywordList.appendChild(keywordItem);
     }
   }
-  
+
 
 }
 
@@ -232,8 +136,6 @@ function clear(){
   updateKeywordList();
 }
 
-const fileList = document.getElementById('fileList');
-const ul = fileList.querySelector('ul');
 
 // Function to search keywords
 async function searchKeywords() {
@@ -316,15 +218,7 @@ function checkKeyPress(event) {
   }
 }
 
-const dropZone = document.getElementById('dropZone');
-const uploadBtn = document.getElementById('upload-button');
-const fileInput = document.getElementById('fileInput');
-const keyWordInput = document.getElementById('keyWordFileInput');
-const keyWordUpldBtn = document.getElementById('keyword-upload-button');
-const addKeywordBtn = document.getElementById('add-key-word-btn');
 
-
-let d = new DataTransfer();
 // Handle uploaded files
 function handleFiles(files) {
       let fileFound = false;
@@ -368,7 +262,7 @@ function handleFiles(files) {
         embedElement.src = URL.createObjectURL(file);
         embedElement.width = '660';
         embedElement.height = '400';
-        
+
 
         pdfViewer.append(embedElement);
         li.append(pdfViewer);
@@ -380,13 +274,13 @@ function handleFiles(files) {
       //console.log(d.files);
       fileInput.files = d.files;
       //console.log(d.items);
-      
+
 }
 function removeFileFromFileList(filename) {
   const dt = new DataTransfer();
   //const input = document.getElementById('fileInput')
   const files = d.files;
-  
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
     if (file.name != filename){
@@ -395,7 +289,7 @@ function removeFileFromFileList(filename) {
   }
   d = dt // Update the list
   fileInput.files = d.files;
-  
+
 }
 
 function reorganizeFiles(files){
@@ -441,63 +335,8 @@ function loadKeywords(file){
 
   reader.readAsBinaryString(file);
 }
-    
-    // Handle upload button click event
-    addKeywordBtn.addEventListener('click', () => {
-      const keywordInput = document.getElementById('keywords');
-      const keyword = keywordInput.value.trim();
-      addKeyword(keyword);
-    });
-
-    // Prevent default behavior for drag-and-drop events
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('drag-over'); // Add CSS class to change background color
-    });
-
-    // Handle drag leave event
-    dropZone.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
-    });
-
-    // Handle file drop event
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
-      const files = e.dataTransfer.files;
-      document.getElementById('fileInput').files = files;
-      handleFiles(files);
-    });
-
-    // Handle file input change event
-    fileInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      handleFiles(files);
-    });
-
-    // Handle upload button click event
-    uploadBtn.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    // Handle add from file button click event
-    keyWordUpldBtn.addEventListener('click', () => {
-      keyWordInput.click();
-      
-    });
-
-    keyWordInput.addEventListener('change', (e) => {
-      loadKeywords(e.target.files[0]);
-    });
-
-   clearButton.addEventListener('click', () => {
-      clear();
-      
-    });
 
 
 
-</script>
-</body>
-</html>
+
+

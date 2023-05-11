@@ -1,11 +1,13 @@
+from config import Config
 import webbrowser
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
 import nltk, os, math
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from PyPDF2 import PdfReader
+
 
 print("Loading...")
 
@@ -14,7 +16,9 @@ nltk.download("stopwords")
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
-app = Flask("ScoreDoc")
+app = Flask(__name__)
+app.config.from_object(Config)
+
 CORS(app)
 @app.route('/')
 def hello():
@@ -23,8 +27,7 @@ def hello():
 
 @app.route('/scoredoc')
 def serve_scoredoc():
-    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend'))
-    return send_from_directory(frontend_dir, 'scoredoc.html')
+    return render_template('scoredoc.html')
 
 
 # Route to handle file upload
@@ -186,10 +189,7 @@ class TextProcessor:
 
 
 def main():
-    url = "http://localhost:6969/scoredoc"
+    url = f"http://{app.config['HOST']}:{app.config['PORT']}/scoredoc"
     webbrowser.open(url)
-    app.run("localhost", 6969)
+    app.run(app.config['HOST'], app.config['PORT'])
 
-
-if __name__ == "__main__":
-    main()

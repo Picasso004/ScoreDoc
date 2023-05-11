@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ScoreDoc</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='xlsx.full.min.js') }}"></script>
+</head>
+<body>
+  <header>
+    <h1>ScoreDoc</h1>
+  </header>
+  <div class="container">
+    <div class="column">
+      <!-- Left Column Content -->
+      <label for="keywords">Enter key words:</label>
+      <input type="text" id="keywords" name="keywords" onkeydown="checkKeyPress(event)">
+      <button id="add-key-word-btn" class="add-button">Add</button>
+      <!-- Input element for file selection -->
+      <input type="file" id="keyWordFileInput" style="display: none;" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <button class="add-button" id="keyword-upload-button">Add from file</button>
+      <div id="keyword_list_container">
+        <button id="clear-button">Clear</button>
+        <div id="keywordList" class="keyword-list">No keywords</div>
+      </div>  
+      <button class="search-button" onclick="searchKeywords()">Search</button>
+      <div id="resultsZone"></div>
+    </div>
+    <div class="column" id="dropZone">
+      <!-- Right Column Content - Drag and Drop Zone -->
+      <p>Drag and drop files here or click to browse</p>
+      <p>Only support pdf and txt files</p>
+      <input type="file" id="fileInput" multiple style="display: none;">
+      <button id="upload-button" >Upload</button>
+      <div class="file-list" id="fileList">
+        <ul></ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
