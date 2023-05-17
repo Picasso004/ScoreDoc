@@ -47,5 +47,7 @@ To clone the ScoreDoc project from GitLab, follow these steps:
    python run.py
    ```
 
-2. The application should now start, and a web page should open in your default web browser pointing to the Flask application's address (e.g., `http://localhost:6969/finder`).
+2. The application should now start, and a web page should open in your default web browser pointing to the Flask application's address (e.g., `http://localhost:6969/scoredoc`).
+
+3. You can edit the config.py
 
