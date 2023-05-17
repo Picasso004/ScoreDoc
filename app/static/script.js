@@ -1,9 +1,7 @@
 // JavaScript code
 
-// Global array to store keywords
-let keywords = [];
-
 //Global variables
+let keywords = [];
 let clearButton;
 let keywordInput;
 let keyword;
@@ -13,84 +11,15 @@ let fileInput;
 let keyWordInput;
 let keyWordUpldBtn;
 let addKeywordBtn;
-
 let fileList;
 let ul;
-
-
 let d = new DataTransfer();
-document.addEventListener("DOMContentLoaded", function(){
-  clearButton = document.getElementById('clear-button');
-  dropZone = document.getElementById('dropZone');
-  uploadBtn = document.getElementById('upload-button');
-  fileInput = document.getElementById('fileInput');
-  keyWordInput = document.getElementById('keyWordFileInput');
-  keyWordUpldBtn = document.getElementById('keyword-upload-button');
-  addKeywordBtn = document.getElementById('add-key-word-btn');
-
-  fileList = document.getElementById('fileList');
-  ul = fileList.querySelector('ul');
-
-  // Handle upload button click event
-    addKeywordBtn.addEventListener('click', () => {
-      keywordInput = document.getElementById('keywords');
-      keyword = keywordInput.value.trim();
-      addKeyword(keyword);
-    });
-
-    // Prevent default behavior for drag-and-drop events
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('drag-over'); // Add CSS class to change background color
-    });
-
-    // Handle drag leave event
-    dropZone.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
-    });
-
-    // Handle file drop event
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
-      const files = e.dataTransfer.files;
-      document.getElementById('fileInput').files = files;
-      handleFiles(files);
-    });
-
-    // Handle file input change event
-    fileInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      handleFiles(files);
-    });
-
-    // Handle upload button click event
-    uploadBtn.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    // Handle add from file button click event
-    keyWordUpldBtn.addEventListener('click', () => {
-      keyWordInput.click();
-
-    });
-
-    keyWordInput.addEventListener('change', (e) => {
-      loadKeywords(e.target.files[0]);
-    });
-
-   clearButton.addEventListener('click', () => {
-      clear();
-
-    });
-});
 
 
 
-
-
-// Function to add keyword to the list
+/* Function to add keyword to the list
+ This function takes a keyword as a parameter and checks if it is not an empty string.
+ If not, it adds the keyword to the global keywords array and updates the keyword list in the UI.*/
 function addKeyword(keyword) {
   const keywordInput = document.getElementById('keywords');
   if (keyword !== '') {
@@ -100,10 +29,13 @@ function addKeyword(keyword) {
   }
 }
 
-// Function to update keyword list in the UI
+/* Function to update keyword list in the UI
+ This function updates the DOM to display the current list of keywords.
+ If there are no keywords, it hides the "clear" button and displays a message saying there are no keywords.
+ If there are keywords, it creates a new div for each keyword and appends it to the keyword list in the DOM.*/
 function updateKeywordList() {
   const keywordList = document.getElementById('keywordList');
-  if(keywords.length == 0){
+  if(keywords.length === 0){
     clearButton.style.display = 'none';
     keywordList.innerHTML = 'No keywords';
   }
@@ -125,24 +57,30 @@ function updateKeywordList() {
 
 }
 
-// Function to remove keyword from the list
+/* Function to remove keyword from the list
+ This function takes an index as a parameter and removes the keyword at that index from the keywords array.
+ It then updates the keyword list in the UI.*/
 function removeKeyword(index) {
   keywords.splice(index, 1);
   updateKeywordList();
 }
 
+// This function clears the keyword list by setting the keywords array to an empty array and updating the keyword list in the UI.
 function clear(){
   keywords = [];
   updateKeywordList();
 }
 
 
-// Function to search keywords
+/* Function to search keywords
+   This function sends a POST request to the server with the keywords as data.
+   The server responds with data that is used to update the results zone in the UI.
+   If there are no keywords or files, it displays an error message in the results zone.*/
 async function searchKeywords() {
   const searchButton = document.getElementsByClassName('search-button')[0];
   const resultsZone = document.getElementById('resultsZone');
   if (keywords.length > 0 && document.getElementById('fileInput').files.length > 0) { // Check if keywords and file are available
-    // Show loading spinner
+    // Show searching and loading message
     searchButton.innerHTML = 'Searching...';
     searchButton.disabled = true;
     searchButton.classList.add('loading');
@@ -208,7 +146,9 @@ async function searchKeywords() {
   }
 }
 
-// Function to handle key press event on keywords input
+/* Function to handle key press event on keywords input
+   This function checks if the key pressed was the Enter key.
+   If so, it gets the value of the keyword input, trims it, and adds it to the keyword list.*/
 function checkKeyPress(event) {
   if (event.keyCode === 13) {
     event.preventDefault();
@@ -218,13 +158,12 @@ function checkKeyPress(event) {
   }
 }
 
-
-// Handle uploaded files
+// This function handles uploaded files. It creates a new list item for each file and appends it to the file list in the DOM.
 function handleFiles(files) {
       let fileFound = false;
       for (const file of files) {
         for(const f of d.files){
-          if(file.name == f.name){
+          if(file.name === f.name){
             fileFound = true;
             break;
           }
@@ -247,7 +186,7 @@ function handleFiles(files) {
         viewBtn.classList.add('eye-btn');
         viewBtn.addEventListener('click', () => {
           var pdfViewer = document.getElementById(file.name);
-          pdfViewer.style.display = (pdfViewer.style.display == "block") ? "none" : "block";
+          pdfViewer.style.display = (pdfViewer.style.display === "block") ? "none" : "block";
         });
         div.appendChild(viewBtn);
         div.appendChild(deleteBtn);
@@ -271,11 +210,11 @@ function handleFiles(files) {
         //Save in files list variable
         d.items.add(file);
       }
-      //console.log(d.files);
       fileInput.files = d.files;
-      //console.log(d.items);
 
 }
+
+// This function removes a file from the file list based on its filename.
 function removeFileFromFileList(filename) {
   const dt = new DataTransfer();
   //const input = document.getElementById('fileInput')
@@ -283,7 +222,7 @@ function removeFileFromFileList(filename) {
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
-    if (file.name != filename){
+    if (file.name !== filename){
       dt.items.add(file) // here you exclude the file. thus removing it.
     }
   }
@@ -292,6 +231,7 @@ function removeFileFromFileList(filename) {
 
 }
 
+// This function reorganizes the files based on the results from the server.
 function reorganizeFiles(files){
   var items = Array.from(ul.getElementsByTagName("li"));
 
@@ -301,13 +241,14 @@ function reorganizeFiles(files){
 
   for(let i =0;i<files.length;i++){
     for (var j = 0; j < items.length; j++) {
-      if(files[i].file == items[j].firstChild.textContent.slice(0,-3)){
+      if(files[i].file === items[j].firstChild.textContent.slice(0,-3)){
         ul.appendChild(items[j]);
       }
     }
   }
 }
 
+// This function loads keywords from a file. It reads the file, parses the data, and adds each keyword to the keyword list.
 function loadKeywords(file){
   const reader = new FileReader();
 
@@ -335,6 +276,74 @@ function loadKeywords(file){
 
   reader.readAsBinaryString(file);
 }
+
+// This function runs when the DOM is fully loaded. It adds event listeners to various elements in the DOM.
+document.addEventListener("DOMContentLoaded", function(){
+  clearButton = document.getElementById('clear-button');
+  dropZone = document.getElementById('dropZone');
+  uploadBtn = document.getElementById('upload-button');
+  fileInput = document.getElementById('fileInput');
+  keyWordInput = document.getElementById('keyWordFileInput');
+  keyWordUpldBtn = document.getElementById('keyword-upload-button');
+  addKeywordBtn = document.getElementById('add-key-word-btn');
+
+  fileList = document.getElementById('fileList');
+  ul = fileList.querySelector('ul');
+
+    // Handle upload button click event
+    addKeywordBtn.addEventListener('click', () => {
+      keywordInput = document.getElementById('keywords');
+      keyword = keywordInput.value.trim();
+      addKeyword(keyword);
+    });
+
+    // Prevent default behavior for drag-and-drop events
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over'); // Add CSS class to change background color
+    });
+
+    // Handle drag leave event
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
+    });
+
+    // Handle file drop event
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over'); // Remove CSS class to reset background color
+      const files = e.dataTransfer.files;
+      document.getElementById('fileInput').files = files;
+      handleFiles(files);
+    });
+
+    // Handle file input change event
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      handleFiles(files);
+    });
+
+    // Handle upload button click event
+    uploadBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Handle add from file button click event
+    keyWordUpldBtn.addEventListener('click', () => {
+      keyWordInput.click();
+
+    });
+
+    keyWordInput.addEventListener('change', (e) => {
+      loadKeywords(e.target.files[0]);
+    });
+
+   clearButton.addEventListener('click', () => {
+      clear();
+
+    });
+});
 
 
 
