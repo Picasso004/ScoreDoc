@@ -1,37 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- Title of the web page -->
   <title>ScoreDoc</title>
+
+  <!-- Linking to the CSS file -->
+  <!-- The CSS file is responsible for styling the web page -->
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Linking to JavaScript files -->
+  <!-- script.js: This script contains the client-side JavaScript code for the application -->
+  <!-- xlsx.full.min.js: This is a library for parsing and writing Excel files -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
   <script src="{{ url_for('static', filename='xlsx.full.min.js') }}"></script>
 </head>
 <body>
+  <!-- Header section of the web page -->
   <header>
     <h1>ScoreDoc</h1>
   </header>
+
+  <!-- Main container for the body of the web page -->
   <div class="container">
+
+    <!-- Left column of the web page -->
     <div class="column">
-      <!-- Left Column Content -->
+
+      <!-- Text input and button for entering keywords -->
+      <!-- The 'onkeydown' attribute checks for key presses in the text box -->
       <label for="keywords">Enter key words:</label>
       <input type="text" id="keywords" name="keywords" onkeydown="checkKeyPress(event)">
       <button id="add-key-word-btn" class="add-button">Add</button>
-      <!-- Input element for file selection -->
+
+      <!-- Hidden input for file selection, used for uploading keyword files -->
       <input type="file" id="keyWordFileInput" style="display: none;" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       <button class="add-button" id="keyword-upload-button">Add from file</button>
+
+      <!-- Container for the list of keywords -->
       <div id="keyword_list_container">
+        <!-- Button for clearing the keyword list -->
         <button id="clear-button">Clear</button>
+        <!-- Display area for the list of keywords -->
         <div id="keywordList" class="keyword-list">No keywords</div>
-      </div>  
-      <button class="search-button" onclick="searchKeywords()">Search</button>
+      </div>
+
+      <!-- Button for initiating a keyword search -->
+      <button class="search-button" id="search-button" onclick="searchKeywords()">Search</button>
+
+      <!-- Display area for the results of the keyword search -->
       <div id="resultsZone"></div>
     </div>
+
+    <!-- Right column of the web page -->
     <div class="column" id="dropZone">
-      <!-- Right Column Content - Drag and Drop Zone -->
+
+      <!-- Text prompts and button for uploading files -->
+      <!-- Only PDF and TXT files are supported -->
       <p>Drag and drop files here or click to browse</p>
       <p>Only support pdf and txt files</p>
+      <!-- Hidden input for file selection, used for uploading files -->
       <input type="file" id="fileInput" multiple style="display: none;">
       <button id="upload-button" >Upload</button>
+
+      <!-- Display area for the list of uploaded files -->
       <div class="file-list" id="fileList">
         <ul></ul>
       </div>

@@ -1,4 +1,4 @@
-from config import Config
+from . config import Config
 import webbrowser
 import nltk, os, math
 from flask import Flask, request, jsonify, render_template
@@ -7,7 +7,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from PyPDF2 import PdfReader
-
 
 print("Loading...")
 
@@ -22,17 +21,20 @@ app.config.from_object(Config)
 CORS(app)
 @app.route('/')
 def hello():
+    # This function returns a simple string when the root route is accessed
     return "Hello, World!"
-
 
 @app.route('/scoredoc')
 def serve_scoredoc():
+    # This function serves the scoredoc.html template when the route /scoredoc is accessed
     return render_template('scoredoc.html')
 
-
-# Route to handle file upload
 @app.route('/upload', methods=['POST'])
 def upload():
+    """
+    This function handles the file upload. It first removes all existing txt and pdf files in the upload directory.
+    Then it saves the files received from the POST request in the upload directory.
+    """
     # Empty upload folder:
     for file in os.listdir(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads'):
         if file.endswith("txt") or file.endswith("pdf"):
@@ -44,9 +46,13 @@ def upload():
         file.save(os.path.dirname(os.path.abspath(__file__)) + '/media/uploads/' + file.filename)
     return jsonify({'message': 'File uploaded successfully'})
 
-
 @app.route('/api/data', methods=['POST'])
 def receive_data():
+    """
+    This function receives the keywords from a POST request, processes each file in the upload directory
+    by tokenizing, removing stop words, lemmatizing and calculating the score for each keyword in the file.
+    It then calculates the TF-IDF score for each file and returns the data as a JSON response.
+    """
     # Access the keywords using 'request.form'
     keywords = request.json['keywords']
     processor = TextProcessor()
@@ -62,25 +68,38 @@ def receive_data():
     data = processor.calculate_tf_idf(data)
     return jsonify(data)
 
-
 class TextProcessor:
+    """
+    This is the TextProcessor class that is used to perform text processing tasks such as tokenization,
+    removal of stop words, lemmatization, and calculating the score for each keyword in a file.
+    """
     def __init__(self, file: str = None):
+        # This is the constructor method that initializes the text and processed_text attributes.
         self.text = None
         if file:
             self.set_file(file)
         self.processed_text = []
 
     def set_file(self, file):
+        """
+        This method sets the file for the TextProcessor object.
+        It calls the extract_text, tokenize, and lemmatize methods to perform text processing tasks.
+        """
         if os.path.exists(file):
             self.extract_text(file)
             self.tokenize()
             self.lemmatize()
 
     def file_len(self):
+        # This method returns the length of the text attribute.
         return len(self.text)
 
     def extract_text(self, file: str):
-        """to extract text any text file"""
+        """
+        This method extracts the text from the file.
+        If the file is a text file, it reads the text directly.
+        If the file is a PDF, it uses the PyPDF2 library to extract the text.
+        """
         if not os.path.exists(file):
             return None
         elif file.endswith(".txt"):
@@ -100,7 +119,10 @@ class TextProcessor:
             self.text = None
 
     def tokenize(self):
-        """stop words removal and tokenization lemmatization"""
+        """
+        This method tokenizes the text and removes stop words.
+        It uses the nltk library for tokenization and stop word removal.
+        """
         if self.text is not None:
             # tokenize words
             result = word_tokenize(self.text)
@@ -110,6 +132,10 @@ class TextProcessor:
             self.processed_text = [word for word in result if word.casefold() not in stop_words]
 
     def lemmatize(self):
+        """
+        This method lemmatizes the tokenized text.
+        It uses the nltk library for lemmatization.
+        """
         # Create WordNetLemmatizer object
         wnl = WordNetLemmatizer()
         pos_tagged_words = nltk.pos_tag(self.processed_text)
@@ -132,6 +158,10 @@ class TextProcessor:
         self.processed_text = lemmatized_words
 
     def get_most_relevant_words(self, words):
+        """
+        This method calculates the score for each keyword in the processed text.
+        The score is the number of occurrences of the keyword in the text.
+        """
         score = {f'{word.lower()}': 0 for word in words}
         for word in self.processed_text:
             if word.lower() in [w.lower() for w in words]:
@@ -144,22 +174,9 @@ class TextProcessor:
 
     def calculate_tf_idf(self, documents):
         """
-        Calculates TF-IDF score for each document based on the keywords and scores provided.
-
-        Args:
-        - documents (list): List of dictionaries representing documents, with 'file' and 'data' keys.
-                           'file' (str): File name of the document.
-                           'data' (list): List of dictionaries representing keywords and scores.
-                                         'word' (str): Keyword.
-                                         'score' (int): Score for the keyword.
-
-        Returns:
-        - list: List of dictionaries representing documents with additional 'tf_idf' key containing TF-IDF score.
-               'file' (str): File name of the document.
-               'data' (list): List of dictionaries representing keywords and scores.
-                             'word' (str): Keyword.
-                             'score' (int): Score for the keyword.
-               'tf_idf' (float): TF-IDF score for the document.
+        This method calculates the TF-IDF score for each document based on the keywords and scores.
+        It calculates the term frequency (TF) and inverse document frequency (IDF) for each keyword,
+        then multiplies them to get the TF-IDF score.
         """
         n = len(documents)
         df = {}
@@ -189,7 +206,10 @@ class TextProcessor:
 
 
 def main():
+    """
+    This is the main function that starts the Flask application.
+    It first opens the web browser with the /scoredoc route and then starts the Flask server.
+    """
     url = f"http://{app.config['HOST']}:{app.config['PORT']}/scoredoc"
     webbrowser.open(url)
     app.run(app.config['HOST'], app.config['PORT'])
-
