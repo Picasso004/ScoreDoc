@@ -1,10 +1,12 @@
+/* Header style */
 header {
     background-color: black;
     color: white;
     text-align: center;
 }
 
-.add-button, #upload-button,.search-button, #clear-button{
+/* Style for buttons */
+.add-button, #upload-button, .search-button, #clear-button {
     margin-left: 1rem;
     background-color: rgb(37, 120, 228);
     color: rgb(255, 255, 255);
@@ -16,16 +18,20 @@ header {
     border-image: initial;
     border-radius: 5px;
 }
+
+/* Main container style */
 .container {
   display: flex;
   height: 100vh;
 }
 
+/* Column style */
 .column {
   flex: 1;
   padding: 20px;
 }
 
+/* DropZone style */
 #dropZone {
   border: 2px dashed #666;
   padding: 20px;
@@ -37,15 +43,18 @@ header {
   background-color: #cbc7c776;
 }
 
+/* DropZone style when file is dragged over */
 #dropZone.drag-over{
   border: 3px dashed #333;
   background-color: #cbc7c7a3;
 }
 
+/* Upload button style */
 .upload-button {
   margin-top: 10px;
 }
 
+/* Keyword list style */
 .keyword-list {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -54,6 +63,7 @@ header {
   max-width: 300px; /* maximum width of 3 keywords per line */
 }
 
+/* Keyword list item style */
 .keyword-list-item {
   list-style-type: none;
   margin-right: 10px; /* space between keywords */
@@ -66,6 +76,7 @@ header {
   align-items: center; /* center align keyword and cross button vertically */
 }
 
+/* Style for the cross button in keyword list items */
 .keyword-list-item button {
     background-color: transparent;
     color: red;
@@ -73,6 +84,7 @@ header {
     cursor: pointer;
 }
 
+/* Spinner style */
 .spinner {
   margin-top: 10px;
   margin-left: 5px;
@@ -84,40 +96,53 @@ header {
   animation: spin 1s linear infinite;
 }
 
+/* Spinner animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-#clear-button{
+
+/* Clear button style */
+#clear-button {
   margin-right: 50px;
   display: none;
 }
+
+/* Styles for result and keyword list containers */
 .result_container, #keyword_list_container {
   display: flex;
   align-items: center;
 }
 
+/* Styles for most relevant results */
 .most_relevant {
   font-size: 20px;
   background-color: yellow;
   margin-left: 50px;
 }
 
+/* Styles for file list */
 .file-list {
   margin-top: 50px;
   margin-bottom: 20px;
 }
+
+/* Styles for unordered list inside file list */
 .file-list ul {
   padding: 0;
   list-style-type: none;
 }
+
+/* Styles for list items inside file list */
 .file-list li {
   margin-bottom: 5px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
 }
-.remove-btn{
+
+/* Styles for remove button inside file list items */
+.remove-btn {
   margin-left: 10px;
   background-color: red;
   color: white;
@@ -125,18 +150,21 @@ header {
   cursor: pointer;
 }
 
+/* Styles for eye button inside file list items */
 .eye-btn {
   cursor: pointer;
   margin-left: 5px;
-  background-color:#4CAF50;
+  background-color: #4CAF50;
 }
-/* Style for the embedded PDF viewer */
+
+/* Styles for the embedded PDF viewer */
 .pdf-viewer {
   display: none;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
+/* Styles for the results zone */
 #resultsZone{
   margin-bottom: 20px;
 }
