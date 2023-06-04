@@ -1,6 +1,6 @@
 # ScoreDoc
 
-ScoreDoc is a web application designed to find the most relevants documents in a set of documents based on some keywords.
+ScoreDoc is a web application designed to find the most relevants documents in a set of documents based on imput keywords.
 
 The DRS system has a wide range of potential applications and can be utilized by various sectors and industries. Some possible real-time applications of the system include:
 - Human Resources: Candidates' profile matching for specific positions, allowing recruiters to easily identify the most suitable applicants.
