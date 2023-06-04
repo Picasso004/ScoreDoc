@@ -2,6 +2,12 @@
 
 ScoreDoc is a web application designed to find the most relevants documents in a set of documents based on some keywords.
 
+The DRS system has a wide range of potential applications and can be utilized by various sectors and industries. Some possible real-time applications of the system include:
+a. Human Resources: Candidates' profile matching for specific positions, allowing recruiters to easily identify the most suitable applicants.
+b. Education: Examination score marking, enabling educators to quickly assess students' performance and identify areas for improvement.
+c. Healthcare: Prediction of illnesses based on medical records and patient history, facilitating early detection and intervention.
+
+
 ## Prerequisites
 
 Before you begin, make sure you have the following installed on your local machine:
