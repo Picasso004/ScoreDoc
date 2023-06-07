@@ -30,7 +30,7 @@ To clone the ScoreDoc project from GitLab, follow these steps:
 3. Run the following command to clone the repository:
 
    ```
-   git clone https://gitlab.com/Picasso004/scoredoc.git
+   git clone https://github.com/Picasso004/ScoreDoc.git
    ```
 
 4. After the repository has been cloned, navigate to the project folder:
